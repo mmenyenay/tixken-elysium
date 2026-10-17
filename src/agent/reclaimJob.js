@@ -1,0 +1,75 @@
+const { runTransaction, getTokenInfo, ramsExecuteTransfer, ramsExecuteBurn } = require('../brickkenClient');
+const db = require('../store');
+const { sendTelegramAlert } = require('../notify/telegram');
+const { sendEmail } = require('../notify/email');
+
+function toRawAmount(amount, decimals) {
+  const dec = decimals === undefined || decimals === null ? 18 : Number(decimals);
+  return (BigInt(amount) * (10n ** BigInt(dec))).toString();
+}
+
+async function reclaimExpiredTickets() {
+  const now = new Date();
+  const events = db.get('events').value();
+
+  for (const event of events) {
+    if (!event.endsAt || new Date(event.endsAt) > now) continue;
+
+    const expiredTickets = db.get('tickets')
+      .filter({ eventId: event.id, status: 'issued' })
+      .value();
+
+    for (const ticket of expiredTickets) {
+      try {
+        const tokenAddress = ticket.tokenAddress;
+        if (!tokenAddress) {
+          throw new Error('Ticket has no stored tokenAddress, was minted before this fix, cannot reclaim via RAMS');
+        }
+
+        const tokenInfo = await getTokenInfo(event.tokenSymbol);
+        const decimals = tokenInfo.allowedTokenDecimals !== undefined ? tokenInfo.allowedTokenDecimals : 18;
+        const rawAmount = toRawAmount('1', decimals);
+        console.log(`[reclaimJob] using tokenAddress ${tokenAddress}, decimals ${decimals}, rawAmount ${rawAmount} for ticket ${ticket.id}`);
+
+        if (event.reclaimMode === 'credit') {
+          await ramsExecuteTransfer(tokenAddress, ticket.attendeeAddress, process.env.SIGNER_ADDRESS, rawAmount);
+
+          await runTransaction('mintToken', {
+            tokenSymbol: process.env.CREDIT_TOKEN_SYMBOL,
+            signerAddress: process.env.SIGNER_ADDRESS,
+            userToMint: [
+              {
+                investorEmail: ticket.attendeeEmail,
+                investorAddress: ticket.attendeeAddress,
+                amount: '1',
+                needWhitelist: true
+              }
+            ]
+          });
+
+          db.get('tickets').find({ id: ticket.id }).assign({ status: 'converted_to_credit' }).write();
+        } else {
+          await ramsExecuteBurn(tokenAddress, ticket.attendeeAddress, rawAmount);
+
+          db.get('tickets').find({ id: ticket.id }).assign({ status: 'reclaimed_burned' }).write();
+        }
+
+        await sendTelegramAlert(`Reclaimed unused ticket for ${event.name}, mode: ${event.reclaimMode}, via RAMS mandate`);
+
+        if (ticket.attendeeEmail) {
+          await sendEmail(
+            ticket.attendeeEmail,
+            `Your ticket for ${event.name} expired`,
+            event.reclaimMode === 'credit'
+              ? '<p>You did not make it to the event. Your ticket was converted into a credit for the next one.</p>'
+              : '<p>Your unused ticket has been closed out.</p>'
+          );
+        }
+      } catch (err) {
+        console.error(`[reclaimJob] failed to reclaim ticket ${ticket.id}:`, err.response ? JSON.stringify(err.response.data) : err.message);
+      }
+    }
+  }
+}
+
+module.exports = { reclaimExpiredTickets };
