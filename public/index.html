@@ -1,688 +1,540 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Tixken</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tixken on Elysium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink-navy: #14171f;
-    --ink-navy-deep: #0c0e14;
-    --stub-cream: #f0ead8;
-    --stub-cream-shadow: #d9d0b8;
-    --stamp-red: #c1272d;
+    --ink: #121521;
+    --ink2: #1a1f30;
+    --paper: #efe8d6;
+    --paper2: #e4dcc5;
     --gold: #c9a227;
-    --text-on-navy: #ece8db;
-    --text-muted: #8b8f9c;
+    --gold-d: #a8851a;
+    --text: #ece8dc;
+    --mute: #9aa0b0;
+    --err: #b3262e;
   }
-
   * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    background: var(--ink-navy);
-    color: var(--text-on-navy);
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-  }
-
-  header {
-    padding: 32px 24px 16px;
-    text-align: center;
-    border-bottom: 1px solid rgba(236, 232, 219, 0.08);
-  }
-
-  .wordmark {
-    font-family: 'Oswald', sans-serif;
-    font-weight: 700;
-    font-size: 34px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    margin: 0;
-  }
-
-  .wordmark span { color: var(--gold); }
-
-  .tagline {
-    color: var(--text-muted);
-    font-size: 13px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-top: 6px;
-  }
-
-  nav {
-    display: flex;
-    justify-content: center;
-    gap: 4px;
-    padding: 20px 16px 0;
-    flex-wrap: wrap;
-  }
-
-  nav button {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-family: 'Oswald', sans-serif;
-    font-size: 14px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 10px 18px;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-  }
-
-  nav button.active {
-    color: var(--text-on-navy);
-    border-bottom-color: var(--gold);
-  }
-
-  main {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 32px 20px 80px;
-  }
-
-  .panel { display: none; }
+  body { margin: 0; background: var(--ink); color: var(--text); font: 16px/1.45 "IBM Plex Sans", system-ui, sans-serif; }
+  header { max-width: 620px; margin: 0 auto; padding: 28px 18px 10px; }
+  h1 { margin: 0; font: 700 44px/1 Oswald, Impact, sans-serif; letter-spacing: 0.04em; }
+  h1 b { color: var(--gold); font-weight: 700; }
+  .tag { margin: 8px 0 16px; color: var(--mute); font-size: 15px; }
+  .bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  #connectBtn { padding: 10px 18px; border: 0; border-radius: 8px; background: var(--gold); color: var(--ink); font: 700 16px Oswald, sans-serif; letter-spacing: 0.05em; cursor: pointer; }
+  .small { font-size: 13px; color: var(--mute); }
+  a { color: var(--gold); word-break: break-all; }
+  .wrap { max-width: 620px; margin: 0 auto; padding: 0 18px 48px; }
+  .status { margin: 14px 0; padding: 10px 12px; border-left: 3px solid var(--gold); background: var(--ink2); font-size: 14px; word-break: break-word; }
+  .status.err { border-left-color: #e5736f; color: #f0a09c; }
+  nav { display: flex; gap: 4px; overflow-x: auto; }
+  nav button { flex: none; padding: 10px 14px; border: 0; border-radius: 10px 10px 0 0; background: transparent; color: var(--mute); font: 500 15px "IBM Plex Sans", sans-serif; cursor: pointer; }
+  nav button.on { background: var(--paper); color: var(--ink); }
+  .panel { display: none; background: var(--paper); color: var(--ink); padding: 18px 18px 22px; border-radius: 0 10px 10px 10px; }
   .panel.active { display: block; }
-
-  .field {
-    margin-bottom: 16px;
-  }
-
-  .field label {
-    display: block;
-    font-size: 12px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-  }
-
-  .field input, .field select {
-    width: 100%;
-    padding: 12px 14px;
-    background: var(--ink-navy-deep);
-    border: 1px solid rgba(236, 232, 219, 0.15);
-    color: var(--text-on-navy);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 14px;
-    border-radius: 4px;
-  }
-
-  .field input:focus, .field select:focus {
-    outline: none;
-    border-color: var(--gold);
-  }
-
-  .btn {
-    width: 100%;
-    padding: 14px;
-    background: var(--gold);
-    color: var(--ink-navy-deep);
-    border: none;
-    font-family: 'Oswald', sans-serif;
-    font-weight: 600;
-    font-size: 15px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-top: 8px;
-  }
-
-  .btn:active { transform: scale(0.99); }
-
-  .status-line {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-top: 14px;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-
-  .status-line.error { color: var(--stamp-red); }
-  .status-line.ok { color: var(--gold); }
-
-  /* Ticket stub */
-  .stub {
-    position: relative;
-    background: var(--stub-cream);
-    color: var(--ink-navy-deep);
-    border-radius: 10px;
-    padding: 24px 22px;
-    margin-top: 20px;
-    box-shadow: 0 12px 0 -4px var(--stub-cream-shadow);
-    overflow: hidden;
-  }
-
-  .stub::before, .stub::after {
-    content: "";
-    position: absolute;
-    width: 24px;
-    height: 24px;
-    background: var(--ink-navy);
-    border-radius: 50%;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-
-  .stub::before { left: -12px; }
-  .stub::after { right: -12px; }
-
-  .perforation {
-    border-left: 2px dashed var(--ink-navy-deep);
-    opacity: 0.25;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 90px;
-  }
-
-  .stub-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding-right: 100px;
-  }
-
-  .stub-event {
-    font-family: 'Oswald', sans-serif;
-    font-weight: 700;
-    font-size: 20px;
-    text-transform: uppercase;
-    line-height: 1.15;
-  }
-
-  .stub-symbol {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    color: #6b6653;
-    margin-top: 4px;
-  }
-
-  .stub-qr {
-    position: absolute;
-    right: 22px;
-    top: 24px;
-    width: 74px;
-    height: 74px;
-  }
-
-  .stub-qr img {
-    width: 100%;
-    height: 100%;
-    border-radius: 4px;
-  }
-
-  .stub-id {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: #6b6653;
-    margin-top: 16px;
-    padding-right: 100px;
-  }
-
-  .stamp {
-    position: absolute;
-    bottom: 18px;
-    right: 24px;
-    border: 3px solid var(--stamp-red);
-    color: var(--stamp-red);
-    font-family: 'Oswald', sans-serif;
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 6px 10px;
-    border-radius: 4px;
-    transform: rotate(-8deg);
-  }
-
-  .stamp.used {
-    border-color: var(--ink-navy);
-    color: var(--ink-navy);
-  }
-
-  #scan-video {
-    width: 100%;
-    border-radius: 8px;
-    margin-top: 12px;
-    background: #000;
-  }
-
-  .leader-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(236, 232, 219, 0.08);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-  }
-
-  .leader-rank {
-    color: var(--gold);
-    font-family: 'Oswald', sans-serif;
-    font-weight: 600;
-    margin-right: 10px;
-  }
-
-  .empty {
-    color: var(--text-muted);
-    font-size: 13px;
-    text-align: center;
-    padding: 24px 0;
-  }
+  h2 { font: 700 20px/1.2 Oswald, sans-serif; letter-spacing: 0.03em; margin: 26px 0 4px; }
+  h2.first { margin-top: 0; }
+  .note { font-size: 13px; color: #5b5a50; margin: 0 0 6px; }
+  label { display: block; margin: 12px 0 2px; font-size: 13px; color: #4a493f; }
+  input, select { width: 100%; padding: 10px 2px; border: 0; border-bottom: 2px solid #b9b19a; background: transparent; color: var(--ink); font: 16px "IBM Plex Sans", sans-serif; border-radius: 0; }
+  input:focus, select:focus { outline: none; border-bottom-color: var(--gold-d); }
+  button.act { width: 100%; margin-top: 16px; padding: 13px; border: 0; border-radius: 8px; background: var(--ink); color: var(--gold); font: 700 16px Oswald, sans-serif; letter-spacing: 0.05em; cursor: pointer; }
+  button.act:focus-visible, nav button:focus-visible, #connectBtn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .out { margin-top: 12px; font-size: 14px; word-break: break-word; }
+  .out div { margin: 2px 0; }
+  .stub { border: 2px dashed var(--ink); border-radius: 8px; padding: 12px; margin-top: 10px; background: var(--paper2); }
+  .stub img { display: block; margin: 10px 0; background: #fff; padding: 4px; }
+  .stamp { display: inline-block; border: 3px solid var(--err); color: var(--err); font: 700 18px Oswald, sans-serif; letter-spacing: 0.12em; padding: 2px 10px; transform: rotate(-5deg); }
 </style>
 </head>
 <body>
-
 <header>
-  <h1 class="wordmark">TIX<span>KEN</span></h1>
-  <div class="tagline">Tokenized tickets for live events</div>
+  <h1>TIX<b>KEN</b></h1>
+  <p class="tag">Tokenized tickets for live events, running on the Elysium testnet.</p>
+  <div class="bar">
+    <button id="connectBtn">Connect wallet</button>
+    <span id="acct" class="small">Not connected</span>
+  </div>
+  <p class="small">Contract <a id="contractLink" target="_blank" rel="noopener"></a></p>
 </header>
 
-<nav>
-  <button class="tab-btn active" data-panel="create">Host</button>
-  <button class="tab-btn" data-panel="claim">Get Ticket</button>
-  <button class="tab-btn" data-panel="scan">Door Scan</button>
-  <button class="tab-btn" data-panel="board">Leaderboard</button>
-  <button class="tab-btn" data-panel="resale">Resale</button>
-</nav>
+<div class="wrap">
+  <div id="status" class="status">Connect your wallet to begin. The page will switch it to Elysium Testnet (chain ID 99801).</div>
 
-<main>
+  <nav id="tabs">
+    <button class="on" data-panel="host">Host</button>
+    <button data-panel="tickets">Tickets</button>
+    <button data-panel="door">Door scan</button>
+    <button data-panel="resale">Resale</button>
+    <button data-panel="agent">Reclaim</button>
+    <button data-panel="board">Leaderboard</button>
+  </nav>
 
-  <section id="create" class="panel active">
-    <div class="field">
-      <label>Event name</label>
-      <input type="text" id="ev-name" placeholder="Sepolia Meetup Night" />
-    </div>
-    <div class="field">
-      <label>Token symbol, 2 to 5 letters</label>
-      <input type="text" id="ev-symbol" placeholder="MEETX" maxlength="5" style="text-transform:uppercase" />
-    </div>
-    <div class="field">
-      <label>Tokenizer email</label>
-      <input type="email" id="ev-email" placeholder="host@example.com" />
-    </div>
-    <div class="field">
-      <label>What happens to unused tickets</label>
-      <select id="ev-reclaim">
-        <option value="burn">Burn them</option>
-        <option value="credit">Convert to a credit for next time</option>
-      </select>
-    </div>
-    <button class="btn" id="create-btn">Tokenize this event</button>
-    <div class="status-line" id="create-status"></div>
+  <section id="host" class="panel active">
+    <h2 class="first">Create an event</h2>
+    <p class="note">Only the organizer wallet (the one that deployed the contract) can create events and issue tickets.</p>
+    <label for="evName">Event name</label>
+    <input id="evName" placeholder="Founders Summit">
+    <label for="evMax">Number of tickets</label>
+    <input id="evMax" type="number" min="1" value="10">
+    <label for="evMins">Event ends in (minutes)</label>
+    <input id="evMins" type="number" min="1" value="60">
+    <label for="evMode">Unused tickets after the event</label>
+    <select id="evMode">
+      <option value="1">Convert to a credit for next time</option>
+      <option value="0">Burn</option>
+    </select>
+    <label for="evFace">Face value (HYPE)</label>
+    <input id="evFace" value="0.01">
+    <label for="evCap">Resale cap above face value (%)</label>
+    <input id="evCap" type="number" min="0" value="20">
+    <button class="act" id="evBtn">Create event</button>
+    <div id="evOut" class="out"></div>
+
+    <h2>Set the reclaim agent</h2>
+    <p class="note">The agent wallet can only reclaim tickets that were never scanned, after the event has ended.</p>
+    <label for="agentAddr">Agent wallet address</label>
+    <input id="agentAddr" placeholder="0x...">
+    <button class="act" id="agentBtn">Set agent</button>
   </section>
 
-  <section id="claim" class="panel">
-    <div class="field">
-      <label>Event ID</label>
-      <input type="text" id="tk-event" placeholder="paste the event id" />
-    </div>
-    <div class="field">
-      <label>Your wallet address</label>
-      <input type="text" id="tk-address" placeholder="0x..." />
-    </div>
-    <div class="field">
-      <label>Your email</label>
-      <input type="email" id="tk-email" placeholder="you@example.com" />
-    </div>
-    <button class="btn" id="claim-btn">Get my ticket</button>
-    <div class="status-line" id="claim-status"></div>
-    <div id="stub-holder"></div>
+  <section id="tickets" class="panel">
+    <h2 class="first">Issue a ticket</h2>
+    <p class="note">Organizer wallet only. The ticket goes straight to the attendee's wallet.</p>
+    <label for="tkEvent">Event ID</label>
+    <input id="tkEvent" type="number" min="1" value="1">
+    <label for="tkTo">Attendee wallet address</label>
+    <input id="tkTo" placeholder="0x...">
+    <button class="act" id="tkBtn">Issue ticket</button>
+    <div id="tkOut" class="out"></div>
+
+    <h2>Look up a ticket</h2>
+    <label for="lkId">Ticket ID</label>
+    <input id="lkId" type="number" min="1">
+    <button class="act" id="lkBtn">Look up</button>
+    <div id="lkOut" class="out"></div>
+
+    <h2>My tickets</h2>
+    <p class="note">Scans recent activity on the contract for tickets held by the connected wallet.</p>
+    <button class="act" id="myBtn">Find my tickets</button>
+    <div id="myOut" class="out"></div>
   </section>
 
-  <section id="scan" class="panel">
-    <div class="field">
-      <label>Ticket ID</label>
-      <input type="text" id="scan-manual" placeholder="paste ticket id, or scan below" />
-    </div>
-    <button class="btn" id="scan-manual-btn">Connect wallet and confirm entry</button>
-    <div id="scan-video"></div>
-  <div class="field" style="margin-top:12px">
-    <label>Or upload a saved QR image</label>
-    <input type="file" id="qr-file-input" accept="image/*" />
-  </div>
-    <div class="status-line" id="scan-status"></div>
-  </section>
-
-  <section id="board" class="panel">
-    <div id="board-list" class="empty">No entries yet</div>
+  <section id="door" class="panel">
+    <h2 class="first">Door scan</h2>
+    <p class="note">The ticket holder or the organizer confirms entry. The ticket is burned on-chain and the holder's attendance is recorded.</p>
+    <label for="scId">Ticket ID</label>
+    <input id="scId" type="number" min="1">
+    <button class="act" id="scBtn">Confirm entry</button>
   </section>
 
   <section id="resale" class="panel">
-    <div class="field">
-      <label>Ticket ID to list</label>
-      <input type="text" id="rs-ticket" placeholder="ticket id" />
-    </div>
-    <div class="field">
-      <label>Asking price</label>
-      <input type="text" id="rs-price" placeholder="50" />
-    </div>
-    <button class="btn" id="rs-list-btn">List for resale</button>
-    <div class="status-line" id="rs-list-status"></div>
+    <h2 class="first">List a ticket for resale</h2>
+    <p class="note">The contract rejects any price above the event's resale cap.</p>
+    <label for="rsId">Ticket ID</label>
+    <input id="rsId" type="number" min="1">
+    <label for="rsPrice">Asking price (HYPE)</label>
+    <input id="rsPrice" placeholder="0.012">
+    <button class="act" id="rsList">List for resale</button>
+    <button class="act" id="rsCancel">Cancel listing</button>
 
-    <div class="field" style="margin-top:28px">
-      <label>Buyer wallet address</label>
-      <input type="text" id="rs-buyer-address" placeholder="0x..." />
-    </div>
-    <div class="field">
-      <label>Buyer email</label>
-      <input type="email" id="rs-buyer-email" placeholder="buyer@example.com" />
-    </div>
-    <button class="btn" id="rs-sell-btn">Connect seller wallet and transfer</button>
-    <div class="status-line" id="rs-sell-status"></div>
+    <h2>Buy a listed ticket</h2>
+    <p class="note">You pay the asking price in HYPE and the seller is paid directly.</p>
+    <label for="byId">Ticket ID</label>
+    <input id="byId" type="number" min="1">
+    <button class="act" id="byBtn">Buy ticket</button>
   </section>
 
-</main>
+  <section id="agent" class="panel">
+    <h2 class="first">Reclaim an unused ticket</h2>
+    <p class="note">Agent wallet only, and only after the event has ended. The ticket is burned, and in credit mode the holder receives a credit.</p>
+    <label for="rcId">Ticket ID</label>
+    <input id="rcId" type="number" min="1">
+    <button class="act" id="rcBtn">Reclaim ticket</button>
 
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <h2>Credits</h2>
+    <label for="crAddr">Wallet address</label>
+    <input id="crAddr" placeholder="0x...">
+    <button class="act" id="crBtn">Check credits</button>
+    <div id="crOut" class="out"></div>
+
+    <h2>Use a credit</h2>
+    <p class="note">Spend one credit to receive a ticket to an upcoming event.</p>
+    <label for="rdEvent">Event ID</label>
+    <input id="rdEvent" type="number" min="1">
+    <button class="act" id="rdBtn">Redeem credit</button>
+  </section>
+
+  <section id="board" class="panel">
+    <h2 class="first">Leaderboard</h2>
+    <p class="note">Attendees ranked by events attended, built from recent door scans.</p>
+    <button class="act" id="lbBtn">Load leaderboard</button>
+    <div id="lbOut" class="out"></div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script>
-async function ensureSepoliaNetwork() {
-  try {
-    await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0xaa36a7' }] });
-  } catch (switchError) {
-    if (switchError.code === 4902) {
-      await window.ethereum.request({
-        method: 'wallet_addEthereumChain',
-        params: [{
-          chainId: '0xaa36a7',
-          chainName: 'Sepolia',
-          nativeCurrency: { name: 'SepoliaETH', symbol: 'SEP', decimals: 18 },
-          rpcUrls: ['https://sepolia.infura.io/v3/'],
-          blockExplorerUrls: ['https://sepolia.etherscan.io']
-        }]
-      });
+(function () {
+  const CONTRACT = "0x2960A6610E18655c52Ada750a824b11dfd5C5751";
+  const CHAIN_HEX = "0x185d9"; // 99801, Elysium Testnet
+  const DEPLOY_BLOCK = 0; // optional: set to the block number of the deploy transaction
+  const TX_URL = "https://explorer-elysium-testnet.t.conduit.xyz/tx/";
+  const ADDR_URL = "https://explorer-elysium-testnet.t.conduit.xyz/address/";
+
+  const ABI = [
+    "function owner() view returns (address)",
+    "function agent() view returns (address)",
+    "function eventCount() view returns (uint256)",
+    "function eventInfo(uint256) view returns (string name, uint256 maxTickets, uint256 minted, uint64 endsAt, uint8 mode, uint256 faceValue, uint16 capPercent, bool exists)",
+    "function ticketEvent(uint256) view returns (uint256)",
+    "function listingPrice(uint256) view returns (uint256)",
+    "function maxResalePrice(uint256) view returns (uint256)",
+    "function attended(address) view returns (uint256)",
+    "function credits(address) view returns (uint256)",
+    "function ownerOf(uint256) view returns (address)",
+    "function createEvent(string eventName, uint256 maxTickets, uint64 endsAt, uint8 mode, uint256 faceValue, uint16 capPercent) returns (uint256)",
+    "function setAgent(address newAgent)",
+    "function mintTicket(uint256 eventId, address to) returns (uint256)",
+    "function redeemCredit(uint256 eventId) returns (uint256)",
+    "function scan(uint256 ticketId)",
+    "function listForResale(uint256 ticketId, uint256 price)",
+    "function cancelListing(uint256 ticketId)",
+    "function buy(uint256 ticketId) payable",
+    "function reclaim(uint256 ticketId)",
+    "event EventCreated(uint256 indexed eventId, string name, uint64 endsAt, uint8 mode)",
+    "event TicketMinted(uint256 indexed ticketId, uint256 indexed eventId, address indexed to)",
+    "event TicketScanned(uint256 indexed ticketId, address indexed holder)",
+    "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  let provider, signer, account, c;
+
+  $("contractLink").textContent = CONTRACT;
+  $("contractLink").href = ADDR_URL + CONTRACT;
+
+  if (!window.ethers) {
+    setStatus("Could not load the ethers library. Check your connection and reload the page.", true);
+  }
+
+  function setStatus(msg, isErr, hash) {
+    const st = $("status");
+    st.className = "status" + (isErr ? " err" : "");
+    st.textContent = msg;
+    if (hash) {
+      const a = document.createElement("a");
+      a.href = TX_URL + hash;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = " View transaction";
+      st.appendChild(a);
+    }
+  }
+
+  function errText(e) {
+    return (e && (e.reason || e.shortMessage || e.message)) || String(e);
+  }
+
+  function needWallet() {
+    if (!c) throw new Error("Connect your wallet first.");
+  }
+
+  function fill(el, lines) {
+    el.textContent = "";
+    lines.forEach((l) => {
+      const d = document.createElement("div");
+      d.textContent = l;
+      el.appendChild(d);
+    });
+  }
+
+  function uint(id) {
+    const v = $(id).value.trim();
+    if (!/^\d+$/.test(v)) throw new Error("Enter a whole number.");
+    return BigInt(v);
+  }
+
+  function addr(id) {
+    const v = $(id).value.trim();
+    if (!ethers.isAddress(v)) throw new Error("Enter a valid wallet address.");
+    return v;
+  }
+
+  async function send(label, fn) {
+    setStatus(label + ": confirm in your wallet...");
+    const tx = await fn();
+    setStatus(label + ": waiting for confirmation...", false, tx.hash);
+    const rc = await tx.wait();
+    setStatus(label + " confirmed in block " + rc.blockNumber + ".", false, tx.hash);
+    return rc;
+  }
+
+  function act(label, body) {
+    return async function () {
+      try {
+        needWallet();
+        await body();
+      } catch (e) {
+        setStatus(label + " failed: " + errText(e), true);
+      }
+    };
+  }
+
+  function findEvent(rc, name) {
+    for (const log of rc.logs) {
+      try {
+        const p = c.interface.parseLog(log);
+        if (p && p.name === name) return p;
+      } catch (e) {}
+    }
+    return null;
+  }
+
+  async function getLogs(filter) {
+    const latest = await provider.getBlockNumber();
+    const starts = DEPLOY_BLOCK > 0 ? [DEPLOY_BLOCK, latest - 9000] : [latest - 50000, latest - 9000];
+    let lastErr;
+    for (const s of starts) {
+      try {
+        return await c.queryFilter(filter, Math.max(0, s), "latest");
+      } catch (e) {
+        lastErr = e;
+      }
+    }
+    throw lastErr;
+  }
+
+  async function ensureChain() {
+    const cur = await window.ethereum.request({ method: "eth_chainId" });
+    if (cur && cur.toLowerCase() === CHAIN_HEX) return;
+    try {
+      await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN_HEX }] });
+    } catch (err) {
+      const code = err && (err.code || (err.data && err.data.originalError && err.data.originalError.code));
+      if (code === 4902) {
+        await window.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [{
+            chainId: CHAIN_HEX,
+            chainName: "Elysium Testnet",
+            nativeCurrency: { name: "HYPE", symbol: "HYPE", decimals: 18 },
+            rpcUrls: ["https://testnet-rpc.elysium.kinetiq.xyz"],
+            blockExplorerUrls: ["https://elysium.kinetiq.xyz/testnet-explorer"]
+          }]
+        });
+      } else {
+        throw err;
+      }
+    }
+    const after = await window.ethereum.request({ method: "eth_chainId" });
+    if (!after || after.toLowerCase() !== CHAIN_HEX) {
+      throw new Error("Switch your wallet to Elysium Testnet (chain ID 99801) and try again.");
+    }
+  }
+
+  async function connect() {
+    try {
+      if (!window.ethereum) {
+        throw new Error("No wallet found. Open this page in MetaMask's browser or a browser with a wallet extension.");
+      }
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      await ensureChain();
+      provider = new ethers.BrowserProvider(window.ethereum);
+      signer = await provider.getSigner();
+      account = await signer.getAddress();
+      c = new ethers.Contract(CONTRACT, ABI, signer);
+      $("acct").textContent = account.slice(0, 6) + "..." + account.slice(-4);
+      $("connectBtn").textContent = "Connected";
+      $("crAddr").value = account;
+      const org = await c.owner();
+      const ag = await c.agent();
+      setStatus("Connected. Organizer: " + org + (org.toLowerCase() === account.toLowerCase() ? " (you)" : "") + ". Agent: " + ag);
+    } catch (e) {
+      setStatus("Connect failed: " + errText(e), true);
+    }
+  }
+
+  async function showStub(ticketId, eventId) {
+    const out = $("tkOut");
+    out.textContent = "";
+    const d = document.createElement("div");
+    d.className = "stub";
+    const t = document.createElement("div");
+    t.textContent = "Ticket " + ticketId + " issued for event " + eventId;
+    d.appendChild(t);
+    try {
+      if (window.QRCode) {
+        const url = await window.QRCode.toDataURL(String(ticketId), { width: 160, margin: 1 });
+        const im = new Image();
+        im.src = url;
+        im.alt = "QR code for ticket " + ticketId;
+        d.appendChild(im);
+      }
+    } catch (e) {}
+    const s = document.createElement("div");
+    s.className = "stamp";
+    s.textContent = "ADMIT ONE";
+    d.appendChild(s);
+    out.appendChild(d);
+  }
+
+  $("connectBtn").onclick = connect;
+
+  if (window.ethereum && window.ethereum.on) {
+    window.ethereum.on("chainChanged", () => location.reload());
+    window.ethereum.on("accountsChanged", () => location.reload());
+  }
+
+  document.querySelectorAll("#tabs button").forEach((b) => {
+    b.onclick = () => {
+      document.querySelectorAll("#tabs button").forEach((x) => x.classList.remove("on"));
+      document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+      b.classList.add("on");
+      $(b.dataset.panel).classList.add("active");
+    };
+  });
+
+  $("evBtn").onclick = act("Create event", async () => {
+    const name = $("evName").value.trim();
+    if (!name) throw new Error("Enter an event name.");
+    const blk = await provider.getBlock("latest");
+    const endsAt = BigInt(blk.timestamp) + uint("evMins") * 60n;
+    const rc = await send("Create event", () =>
+      c.createEvent(name, uint("evMax"), endsAt, Number($("evMode").value), ethers.parseEther($("evFace").value.trim()), Number(uint("evCap")))
+    );
+    const ev = findEvent(rc, "EventCreated");
+    fill($("evOut"), [
+      "Event created.",
+      "Event ID: " + (ev ? ev.args.eventId.toString() : "see the transaction"),
+      "Ends at (unix time): " + endsAt.toString()
+    ]);
+  });
+
+  $("agentBtn").onclick = act("Set agent", async () => {
+    await send("Set agent", () => c.setAgent(addr("agentAddr")));
+  });
+
+  $("tkBtn").onclick = act("Issue ticket", async () => {
+    const eventId = uint("tkEvent");
+    const rc = await send("Issue ticket", () => c.mintTicket(eventId, addr("tkTo")));
+    const ev = findEvent(rc, "TicketMinted");
+    if (ev) {
+      await showStub(ev.args.ticketId.toString(), eventId.toString());
     } else {
-      throw switchError;
-    }
-  }
-}
-async function sendPreparedTransaction(rawTx) {
-  const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-  const account = accounts[0];
-  const hex = (v) => {
-    if (v === undefined || v === null) return undefined;
-    if (typeof v === 'string' && v.startsWith('0x')) return v;
-    return '0x' + BigInt(v).toString(16);
-  };
-  if (rawTx.from && rawTx.from.toLowerCase() !== account.toLowerCase()) {
-    console.warn('[sendPreparedTransaction] connected wallet', account, 'does not match expected signer', rawTx.from);
-  }
-  const normalized = { from: account, to: rawTx.to, data: rawTx.data };
-  if (rawTx.value !== undefined) normalized.value = hex(rawTx.value);
-  if (rawTx.gasLimit !== undefined) normalized.gas = hex(rawTx.gasLimit);
-  else if (rawTx.gas !== undefined) normalized.gas = hex(rawTx.gas);
-  return window.ethereum.request({ method: 'eth_sendTransaction', params: [normalized] });
-}
-let html5QrcodeScanner = null;
-function getScannerInstance() {
-    if (!html5QrcodeScanner) html5QrcodeScanner = new Html5Qrcode('scan-video');
-    return html5QrcodeScanner;
-}
-</script>
-
-<script>
-  const tabs = document.querySelectorAll('.tab-btn');
-  const panels = document.querySelectorAll('.panel');
-
-  tabs.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      tabs.forEach((b) => b.classList.remove('active'));
-      panels.forEach((p) => p.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById(btn.dataset.panel).classList.add('active');
-      if (btn.dataset.panel === 'board') loadLeaderboard();
-      if (btn.dataset.panel === 'scan') startScanner();
-    });
-  });
-
-  async function postJson(url, body) {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      const message = typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
-      throw new Error(message || 'Request failed');
-    }
-    return data;
-  }
-
-  document.getElementById('create-btn').addEventListener('click', async () => {
-    const status = document.getElementById('create-status');
-    status.className = 'status-line';
-    status.textContent = 'Tokenizing on the sandbox, this can take a moment...';
-    try {
-      const data = await postJson('/api/events', {
-        name: document.getElementById('ev-name').value,
-        tokenSymbol: document.getElementById('ev-symbol').value.toUpperCase(),
-        tokenizerEmail: document.getElementById('ev-email').value,
-        reclaimMode: document.getElementById('ev-reclaim').value,
-        supplyCap: '1000'
-      });
-      status.className = 'status-line ok';
-      status.textContent = 'Event live. Event ID: ' + data.event.id;
-    } catch (err) {
-      status.className = 'status-line error';
-      status.textContent = err.message;
+      fill($("tkOut"), ["Ticket issued. Find the ticket ID in the transaction."]);
     }
   });
 
-  document.getElementById('claim-btn').addEventListener('click', async () => {
-    const status = document.getElementById('claim-status');
-    status.className = 'status-line';
-    status.textContent = 'Minting your ticket...';
-    try {
-      const data = await postJson('/api/tickets', {
-        eventId: document.getElementById('tk-event').value,
-        attendeeAddress: document.getElementById('tk-address').value,
-        attendeeEmail: document.getElementById('tk-email').value
-      });
-      status.className = 'status-line ok';
-      status.textContent = 'Ticket minted';
-      renderStub(data);
-    } catch (err) {
-      status.className = 'status-line error';
-      status.textContent = err.message;
-    }
-  });
-
-  function renderStub(data) {
-    const holder = document.getElementById('stub-holder');
-    holder.innerHTML = `
-      <div class="stub" data-ticket-id="${data.ticket.id}">
-        <div class="perforation"></div>
-        <div class="stub-top">
-          <div>
-            <div class="stub-event">Ticket confirmed</div>
-            <div class="stub-symbol">Ticket ID</div>
-          </div>
-        </div>
-        <div class="stub-qr"><img src="${data.qrDataUrl}" alt="ticket qr code" /></div>
-        <div class="stub-id">${data.ticket.id}</div>
-        <div class="stamp" data-ticket-id="${data.ticket.id}">Admit One</div>
-      </div>
-    `;
-  }
-
-  document.getElementById('scan-manual-btn').addEventListener('click', async () => {
-    const ticketId = document.getElementById('scan-manual').value.trim();
-    if (ticketId) await confirmEntry(ticketId);
-  });
-
-  document.getElementById('qr-file-input').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    const status = document.getElementById('scan-status');
-    status.className = 'status-line';
-    status.textContent = 'Reading QR image...';
-    try {
-      const qrRegion = getScannerInstance();
-      const decodedText = await qrRegion.scanFile(file, true);
-      try {
-        const payload = JSON.parse(decodedText);
-        confirmEntry(payload.ticketId);
-      } catch (err) {
-        confirmEntry(decodedText);
-      }
-    } catch (err) {
-      status.className = 'status-line error';
-      status.textContent = 'Could not read a QR code in that image';
-    }
-  });
-
-  async function confirmEntry(ticketId) {
-    const status = document.getElementById('scan-status');
-    status.className = 'status-line'; status.textContent = 'eth check: ' + typeof window.ethereum + ' request: ' + typeof (window.ethereum && window.ethereum.request);
-    if (!window.ethereum) {
-      status.className = 'status-line error';
-      status.textContent = 'No wallet provider found. Open Tixken inside the MetaMask app browser tab.';
+  $("lkBtn").onclick = act("Look up", async () => {
+    const id = uint("lkId");
+    const evId = await c.ticketEvent(id);
+    if (evId === 0n) {
+      fill($("lkOut"), ["No ticket with that ID."]);
       return;
     }
+    const info = await c.eventInfo(evId);
+    const lines = ["Event: " + info[0] + " (ID " + evId.toString() + ")"];
+    let holder = null;
     try {
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-      try {
-        await ensureSepoliaNetwork();
-      } catch (netErr) {
-        console.error('[confirmEntry] network switch failed, continuing anyway', netErr);
-      }
-
-      status.textContent = 'Preparing entry check...';
-      const prepared = await postJson('/api/scan/prepare', { ticketId });
-
-      const tx = prepared.transactions[0];
-      status.textContent = 'Confirm in your wallet...';
-
-          const txHash = await sendPreparedTransaction(tx);
-      status.textContent = 'Confirming with Brickken...';
-      await postJson('/api/scan/confirm', { ticketId, txId: prepared.txId, txHash });
-
-      status.className = 'status-line ok';
-      status.textContent = 'Entry confirmed, ticket closed out';
-
-      const stamp = document.querySelector(`.stamp[data-ticket-id="${ticketId}"]`);
-      if (stamp) {
-        stamp.classList.add('used');
-        stamp.textContent = 'Used';
-      }
-    } catch (err) {
-      status.className = 'status-line error';
-      status.textContent = (err && err.stack) ? err.stack : String((err && err.message) || err);
-      console.error('[confirmEntry] failed for ticketId', ticketId, 'code:', err && err.code, err);
+      holder = await c.ownerOf(id);
+    } catch (e) {}
+    if (!holder) {
+      lines.push("Status: not active (scanned or reclaimed)");
+    } else {
+      lines.push("Holder: " + holder);
+      const lp = await c.listingPrice(id);
+      lines.push(lp > 0n ? "Listed for resale at " + ethers.formatEther(lp) + " HYPE" : "Not listed for resale");
+      lines.push("Resale cap: " + ethers.formatEther(await c.maxResalePrice(id)) + " HYPE");
     }
-  }
+    lines.push("Unused tickets: " + (Number(info[4]) === 1 ? "converted to a credit" : "burned"));
+    lines.push("Event ends: " + new Date(Number(info[3]) * 1000).toLocaleString());
+    fill($("lkOut"), lines);
+  });
 
-  let scannerStarted = false;
-  async function startScanner() {
-    if (scannerStarted) return;
-    scannerStarted = true;
-    const qrRegion = getScannerInstance();
-    Html5Qrcode.getCameras().then((cameras) => {
-      const backCamera = cameras.find((c) => /back|rear|environment/i.test(c.label));
-      const chosenCamera = backCamera ? backCamera.id : cameras[cameras.length - 1].id;
-      qrRegion.start(
-        chosenCamera,
-        { fps: 10, qrbox: 220 },
-        (decodedText) => {
-          try {
-            const payload = JSON.parse(decodedText);
-            confirmEntry(payload.ticketId);
-          } catch (e) {
-            confirmEntry(decodedText);
-          }
-        },
-        () => {}
-      );
-    }).catch(() => {
-      document.getElementById('scan-status').textContent = 'Camera unavailable, use the manual field above';
+  $("myBtn").onclick = act("Find my tickets", async () => {
+    const logs = await getLogs(c.filters.Transfer(null, account));
+    const ids = [];
+    logs.forEach((l) => {
+      if (l.args) {
+        const id = l.args[2].toString();
+        if (ids.indexOf(id) === -1) ids.push(id);
+      }
     });
-  }
-
-  async function loadLeaderboard() {
-    const list = document.getElementById('board-list');
-    try {
-      const res = await fetch('/api/leaderboard');
-      const entries = await res.json();
-    if (!entries.length) {
-      list.className = 'empty';
-      list.textContent = 'No entries yet';
-      return;
+    const mine = [];
+    for (const id of ids) {
+      try {
+        const o = await c.ownerOf(BigInt(id));
+        if (o.toLowerCase() === account.toLowerCase()) {
+          const evId = await c.ticketEvent(BigInt(id));
+          mine.push("Ticket " + id + " (event " + evId.toString() + ")");
+        }
+      } catch (e) {}
     }
-    list.className = '';
-      list.innerHTML = entries.map((e, i) => `
-        <div class="leader-row">
-          <span><span class="leader-rank">#${i + 1}</span>${e.attendeeAddress}</span>
-          <span>${e.eventsAttended} attended</span>
-        </div>
-      `).join('');
-    } catch (err) {
-      list.textContent = 'Could not load leaderboard';
-    }
-  }
-
-  async function getWalletAddress() {
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    return accounts[0];
-  }
-
-  document.getElementById('rs-list-btn').addEventListener('click', async () => {
-    const status = document.getElementById('rs-list-status');
-    status.className = 'status-line';
-    status.textContent = 'Listing...';
-    try {
-      const data = await postJson('/api/resale/list', {
-        ticketId: document.getElementById('rs-ticket').value,
-        sellerAddress: (await getWalletAddress()) || '',
-        price: Number(document.getElementById('rs-price').value)
-      });
-      status.className = 'status-line ok';
-      status.textContent = `Listed at ${data.price}, cap was ${data.cap}`;
-    } catch (err) {
-      status.className = 'status-line error';
-      status.textContent = err.message;
-    }
+    fill($("myOut"), mine.length ? mine : ["No active tickets found for this wallet in the scanned range."]);
+    setStatus("Done.");
   });
 
-  document.getElementById('rs-sell-btn').addEventListener('click', async () => {
-    const status = document.getElementById('rs-sell-status');
-    const ticketId = document.getElementById('rs-ticket').value;
-    const buyerAddress = document.getElementById('rs-buyer-address').value;
-    const buyerEmail = document.getElementById('rs-buyer-email').value;
-    status.className = 'status-line';
-    status.textContent = 'Connecting wallet...';
-    try {
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-      await ensureSepoliaNetwork();
-
-      status.textContent = 'Preparing transfer...';
-      const prepared = await postJson('/api/resale/prepare-transfer', { ticketId, buyerAddress, buyerEmail });
-
-      const tx = prepared.transactions[0];
-      status.textContent = 'Confirm the transfer in your wallet...';
-
-          const txHash = await sendPreparedTransaction(tx);
-
-      status.textContent = 'Confirming with Brickken...';
-      await postJson('/api/resale/send-transfer', {
-        ticketId, buyerAddress, buyerEmail,
-        txId: prepared.txId, txHash
-      });
-
-      status.className = 'status-line ok';
-      status.textContent = 'Transferred, ticket now belongs to the buyer';
-    } catch (err) {
-      status.className = 'status-line error';
-      status.textContent = err.message;
-    }
+  $("scBtn").onclick = act("Confirm entry", async () => {
+    await send("Confirm entry", () => c.scan(uint("scId")));
   });
+
+  $("rsList").onclick = act("List for resale", async () => {
+    await send("List for resale", () => c.listForResale(uint("rsId"), ethers.parseEther($("rsPrice").value.trim())));
+  });
+
+  $("rsCancel").onclick = act("Cancel listing", async () => {
+    await send("Cancel listing", () => c.cancelListing(uint("rsId")));
+  });
+
+  $("byBtn").onclick = act("Buy ticket", async () => {
+    const id = uint("byId");
+    const price = await c.listingPrice(id);
+    if (price === 0n) throw new Error("That ticket is not listed for resale.");
+    await send("Buy ticket", () => c.buy(id, { value: price }));
+  });
+
+  $("rcBtn").onclick = act("Reclaim ticket", async () => {
+    await send("Reclaim ticket", () => c.reclaim(uint("rcId")));
+  });
+
+  $("crBtn").onclick = act("Check credits", async () => {
+    const who = addr("crAddr");
+    const n = await c.credits(who);
+    const a = await c.attended(who);
+    fill($("crOut"), ["Credits: " + n.toString(), "Events attended: " + a.toString()]);
+  });
+
+  $("rdBtn").onclick = act("Redeem credit", async () => {
+    const eventId = uint("rdEvent");
+    const rc = await send("Redeem credit", () => c.redeemCredit(eventId));
+    const ev = findEvent(rc, "TicketMinted");
+    if (ev) setStatus("Credit redeemed. Your new ticket ID is " + ev.args.ticketId.toString() + ".", false, rc.hash);
+  });
+
+  $("lbBtn").onclick = act("Load leaderboard", async () => {
+    const logs = await getLogs(c.filters.TicketScanned());
+    const counts = {};
+    logs.forEach((l) => {
+      if (l.args) {
+        const h = l.args[1];
+        counts[h] = (counts[h] || 0) + 1;
+      }
+    });
+    const rows = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map((e, i) => "#" + (i + 1) + "  " + e[0].slice(0, 6) + "..." + e[0].slice(-4) + "  attended " + e[1]);
+    fill($("lbOut"), rows.length ? rows : ["No door scans found in the scanned range yet."]);
+    setStatus("Done.");
+  });
+})();
 </script>
 </body>
 </html>
